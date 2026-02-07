@@ -1,0 +1,60 @@
+workflows:
+  ios-build:
+    name: RichyVPN iOS Build
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    
+    environment:
+      node: 18
+      nvm_dir: $HOME/.nvm
+      xcode: latest
+      cocoapods: default
+      groups:
+        - app_store_credentials
+    
+    triggering:
+      events:
+        - push
+        - pull_request
+        - tag
+      branches:
+        - main
+        - develop
+      tag_patterns:
+        - pattern: 'v*'
+          include: true
+    
+    scripts:
+      - name: Install Node dependencies
+        script: |
+          npm install
+      
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios
+          pod install
+          cd ..
+      
+      - name: Build iOS Archive
+        script: |
+          cd ios
+          xcodebuild -workspace RichyVPN_RN.xcworkspace \
+            -scheme RichyVPN_RN \
+            -configuration Release \
+            -derivedDataPath build \
+            -archivePath build/RichyVPN_RN.xcarchive \
+            archive
+          cd ..
+    
+    artifacts:
+      - ios/build/RichyVPN_RN.xcarchive
+      - build/logs/xcodebuild_archive.log
+    
+    publishing:
+      email:
+        recipients:
+          - user@example.com
+        notify_on_build_start: true
+      slack:
+        channel: '#ios-builds'
+        notify_on_build_start: true

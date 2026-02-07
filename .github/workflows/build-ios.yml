@@ -1,0 +1,62 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install Node dependencies
+        run: npm install
+      
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+      
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+          cd ..
+      
+      - name: Build Archive
+        run: |
+          cd ios
+          xcodebuild -workspace RichyVPN_RN.xcworkspace \
+            -scheme RichyVPN_RN \
+            -configuration Release \
+            -derivedDataPath build \
+            -archivePath ${{ github.workspace }}/build/RichyVPN_RN.xcarchive \
+            archive
+          cd ..
+      
+      - name: Upload Archive artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: RichyVPN_RN.xcarchive
+          path: build/RichyVPN_RN.xcarchive
+          retention-days: 30
+      
+      - name: Upload build logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-logs
+          path: build/logs/
