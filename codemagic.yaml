@@ -16,6 +16,12 @@ workflows:
         - tag
     
     scripts:
+      - name: Clear cache
+        script: |
+          watchman watch-del-all || true
+          cd $HOME && rm -rf .watchman || true
+          cd $HOME && rm -rf .metro || true
+      
       - name: Install Node dependencies
         script: npm install
       
