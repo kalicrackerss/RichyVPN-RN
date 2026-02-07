@@ -16,9 +16,6 @@ workflows:
         - push
         - pull_request
         - tag
-      branch:
-        pattern: 'main|develop'
-        include: true
     
     scripts:
       - name: Install Node dependencies
