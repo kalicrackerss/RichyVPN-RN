@@ -1,3 +1,51 @@
+name: iOS Archive Build (Public Logs)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build iOS Archive
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Install CocoaPods
+        run: |
+          sudo gem install cocoapods --no-document || true
+
+      - name: Install iOS pods
+        working-directory: ios
+        run: |
+          pod install --repo-update || true
+
+      - name: Build Xcode archive (no code signing)
+        run: |
+          mkdir -p build
+          xcodebuild -workspace ios/RichyVPN_RN.xcworkspace \
+            -scheme RichyVPN_RN \
+            -configuration Release \
+            -derivedDataPath build/derivedData \
+            -archivePath build/RichyVPN_RN.xcarchive \
+            archive CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RichyVPN_xcarchive
+          path: build/RichyVPN_RN.xcarchive
 name: Build iOS IPA
 
 on:
