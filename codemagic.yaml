@@ -8,8 +8,6 @@ workflows:
       node: 18
       xcode: latest
       cocoapods: default
-      groups:
-        - app_store_credentials
     
     triggering:
       events:
@@ -19,8 +17,7 @@ workflows:
     
     scripts:
       - name: Install Node dependencies
-        script: |
-          npm install
+        script: npm install
       
       - name: Install CocoaPods dependencies
         script: |
@@ -41,12 +38,8 @@ workflows:
     
     artifacts:
       - ios/build/RichyVPN_RN.xcarchive
-      - build/logs/xcodebuild_archive.log
     
     publishing:
       email:
         recipients:
           - user@example.com
-      slack:
-        channel: '#ios-builds'
-        notify_on_build_start: false
