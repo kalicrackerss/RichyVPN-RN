@@ -6,7 +6,6 @@ workflows:
     
     environment:
       node: 18
-      nvm_dir: $HOME/.nvm
       xcode: latest
       cocoapods: default
       groups:
@@ -17,9 +16,10 @@ workflows:
         - push
         - pull_request
         - tag
-      branches:
-        - main
-        - develop
+      include:
+        branches:
+          - main
+          - develop
       tag_patterns:
         - pattern: 'v*'
           include: true
@@ -54,7 +54,6 @@ workflows:
       email:
         recipients:
           - user@example.com
-        notify_on_build_start: true
       slack:
         channel: '#ios-builds'
-        notify_on_build_start: true
+        notify_on_build_start: false
